@@ -1,7 +1,7 @@
 name: Standard Matrix Unit Test
 runs-on: self-hosted
 on:
-  pull-request:
+  pull_request:
   push:
   schedule:
     - cron: '*/1440 * * * *'
