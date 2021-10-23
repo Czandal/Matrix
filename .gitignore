@@ -1039,8 +1039,10 @@ Module.symvers
 Mkfile.old
 dkms.conf
 
-build/
+Build/
+Build
 build
+build/
 
 CMakeLists.txt.user
 CMakeCache.txt
