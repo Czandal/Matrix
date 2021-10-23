@@ -42,6 +42,9 @@ namespace LinearAlgebra
 
 		const T& get(const size_t& Row, const size_t& Col) const { return context[Row][Col];}
 
+		//
+		constexpr bool operator==(const Matrix<T>& other)const { return context == other.context; }
+
 		//copies object
 		Matrix<T> operator=(const Matrix<T>& index);
 
