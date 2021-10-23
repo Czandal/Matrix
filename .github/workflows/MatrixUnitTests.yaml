@@ -1,4 +1,5 @@
-name: GitHub Actions Demo
+name: Standard Matrix Unit Test
+runs-on: self-hosted
 on: [push]
 jobs:
   Explore-GitHub-Actions:
