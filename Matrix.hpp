@@ -592,7 +592,7 @@ namespace LinearAlgebra
 				}
 			}
 		}
-		return sub.det()*(std::powl(-1.l,i+j));
+		return sub.det()*(std::pow(-1.l,i+j));
 	}
 
 	template<typename T>
