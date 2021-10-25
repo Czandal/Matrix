@@ -21,9 +21,10 @@ jobs:
            sh configure.sh
       - name: echo "Run generate script"
         run: |
-          ls
+          cd Test
           sh generate.sh
       - name: echo "Run unit tests procedure"
         run: |
+          cd Test
           sh run.sh
       - run: echo "🍏 This job's status is ${{ job.status }}."
