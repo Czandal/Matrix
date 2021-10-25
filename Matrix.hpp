@@ -3,7 +3,7 @@
 #include <vector>
 #include <functional>
 #include <string>
-#include <math.h>
+#include <cmath>
 
 namespace LinearAlgebra
 {
