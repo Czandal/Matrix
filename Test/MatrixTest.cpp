@@ -11,7 +11,7 @@ struct MatrixTest : public ::testing::Test
 	{
 		std::random_device rd;
 		engine.seed(rd());
-		distr = std::uniform_real_distribution<long double>(0.0l, 1.l);
+		distr = std::uniform_real_distribution<long double>(-10.0l, 10.l);
 	}
 	virtual void TearDown() override
 	{
@@ -98,7 +98,7 @@ TEST_F(MatrixTest, MatrixMultiplicationTest)
 		then("There exists multiplicative inverse D such that C*D=identity:");
 		Mat D;
 		ASSERT_NO_THROW(D=C.adjoint().transposed()/determinantC)<<"Error: C is not invertible!\n";
-		ASSERT_TRUE(C * D == id)<<"Error: C*D is not equal to identity matrix!\n";
+		EXPECT_TRUE(C*D == id)<<"Error: C*D is not equal to identity matrix!\n";
 		D.print();
 	}
 }
