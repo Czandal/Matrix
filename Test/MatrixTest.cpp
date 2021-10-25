@@ -90,8 +90,8 @@ TEST_F(MatrixTest, MatrixMultiplicationTest)
 	ASSERT_NO_THROW(determinantC = C.det()) << "Error: Determinant is not defined\n";
 	determinantC = C.det();
 	std::cout << determinantC<<"\n";
-	
-	if (determinantC != 0.l)
+
+	if (std::abs(determinantC) >= 0.0000001l)
 	{
 		when("Determinant of C is not equal to 0");
 
