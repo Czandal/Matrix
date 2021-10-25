@@ -3,10 +3,12 @@
 #include <vector>
 #include <functional>
 #include <string>
+#include <math.h>
 
 namespace LinearAlgebra
 {
 	static const std::string __ExceptionMatrixMultiplicationUndefined("Matrix multiplication is valid only if number of columns of left one is equal to number of rows of the right one!");
+	static const std::string __ExceptionMatrixDeterminantUndefined("Matrix determinant is valid only for square matrices!");
 	template <typename T>
 	class Matrix
 	{
@@ -127,6 +129,12 @@ namespace LinearAlgebra
 		size_t getCountColumns() const { return columns; }
 
 		constexpr bool empty() const;
+
+		constexpr T det() const;
+
+		constexpr T cofactor(const size_t& i, const size_t& j) const;
+
+		Matrix<T> adjoint() const;
 	};
 
 	
@@ -542,6 +550,68 @@ namespace LinearAlgebra
 	}
 
 	template<typename T>
+	constexpr T Matrix<T>::det() const
+	{
+		if (rows == columns && rows != 0)
+		{
+			T det = 0;
+			switch (rows)
+			{
+			case 1:
+				return context[0][0];
+			case 2:
+				return context[0][0] * context[1][1] - context[0][1] * context[1][0];
+			}
+			for (size_t j = 0; j < columns; j++)
+			{
+				det += context[0][j]*cofactor(0,j);
+			}
+			return det;
+		}
+		else
+		{
+			throw __ExceptionMatrixDeterminantUndefined;
+		}
+	}
+
+	template<typename T>
+	constexpr T Matrix<T>::cofactor(const size_t& i, const size_t& j) const
+	{
+		Matrix<T> sub(rows - 1, columns - 1);
+		size_t it = 0;
+		for (size_t r = 0; r < rows; r++)
+		{
+			if (r != i)
+			{
+				for (size_t c = 0; c < columns; c++)
+				{
+					if (c != j)
+					{
+						sub(it / columns, it % columns) = context[r][c];
+					}
+				}
+			}
+		}
+		return sub.det()*(std::powl(-1.l,i+j));
+	}
+
+	template<typename T>
+	Matrix<T> Matrix<T>::adjoint() const
+	{
+		Matrix ad(rows, columns);
+		for (size_t i = 0; i < rows; i++)
+		{
+			for (size_t j = 0; j < columns; j++)
+			{
+				ad(i, j) = cofactor(i, j);
+			}
+		}
+		return ad;
+	}
+
+
+
+	template<typename T>
 	void modify(Matrix<T>& M,std::function<void(T&)> f)
 	{
 		for (size_t i = 0; i < M.getCountRows(); i++)
@@ -590,7 +660,7 @@ namespace LinearAlgebra
 			for (size_t j = 0; j < Mat.getCountColumns(); j++)
 			{
 				T W = Mat(i, j);
-				if (isnan(W))
+				if (std::isnan(W))
 				{
 					return true;
 				}
