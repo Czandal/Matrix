@@ -588,6 +588,7 @@ namespace LinearAlgebra
 					if (c != j)
 					{
 						sub(it / columns, it % columns) = context[r][c];
+						it++;
 					}
 				}
 			}

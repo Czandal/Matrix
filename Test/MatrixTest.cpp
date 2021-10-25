@@ -89,7 +89,7 @@ TEST_F(MatrixTest, MatrixMultiplicationTest)
 	long double determinantC;
 	ASSERT_NO_THROW(determinantC = C.det()) << "Error: Determinant is not defined\n";
 	determinantC = C.det();
-	std::cout << determinantC;
+	std::cout << determinantC<<"\n";
 	
 	if (determinantC != 0.l)
 	{
