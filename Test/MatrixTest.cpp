@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include "../Matrix.hpp"
 #include <random>
+#include <math.h>
 
 struct MatrixTest : public ::testing::Test
 {
