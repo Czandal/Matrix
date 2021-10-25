@@ -21,6 +21,7 @@ jobs:
            sh configure.sh
       - name: echo "Run generate script"
         run: |
+          ls
           sh generate.sh
       - name: echo "Run unit tests procedure"
         run: |
