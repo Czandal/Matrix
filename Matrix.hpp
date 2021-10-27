@@ -4,11 +4,10 @@
 #include <functional>
 #include <string>
 #include <cmath>
+#include <exception>
 
 namespace LinearAlgebra
 {
-	static const std::string __ExceptionMatrixMultiplicationUndefined("Matrix multiplication is valid only if number of columns of left one is equal to number of rows of the right one!");
-	static const std::string __ExceptionMatrixDeterminantUndefined("Matrix determinant is valid only for square matrices!");
 	template <typename T>
 	class Matrix
 	{
@@ -29,68 +28,65 @@ namespace LinearAlgebra
 		//copying constructor
 		Matrix(const Matrix<T>& Q);
 
-		//accesses row of given index
+		//accesses row of given index without boundary checks
 		std::vector<T>& operator[](const size_t& index) { return context[index]; }
 
 		constexpr const std::vector<T>& operator[](const size_t& index) const { return context[index]; }
 
-		//accesses field of context
+		//accesses field of context without bondary checks
 		T& operator()(const size_t& Row, const size_t& Col) {return context[Row][Col];}
 
 		constexpr const T& operator()(const size_t& Row, const size_t& Col) const {return context[Row][Col]; }
 
-		//accesses field of context
-		T& at (const size_t& Row, const size_t& Col) {return context[Row][Col];}
+		//accesses field of context wit boundary checks
+		constexpr T& at (const size_t& Row, const size_t& Col) {return (Row<rows&&Col<columns)?context[Row][Col]:(throw std::out_of_range("Field of given row and col doesn't exist"));}
 
-		const T& get(const size_t& Row, const size_t& Col) const { return context[Row][Col];}
+		constexpr const T& at(const size_t& Row, const size_t& Col) const { return ((Row<rows&&Col<columns)?context[Row][Col]:throw std::out_of_range("Field of given row and col doesn't exist")); }
 
-		//
-		constexpr bool operator==(const Matrix<T>& other)const { return context == other.context; }
+		//returns true iff two objects have are equal
+		constexpr bool operator==(const Matrix<T>& other)const { return (context == other.context&&rows==other.rows&&other.columns); }
 
 		//copies object
-		Matrix<T> operator=(const Matrix<T>& index);
+		Matrix<T> operator=(const Matrix<T>& index) noexcept;
 
 		//addition of matrices
-		Matrix<T> operator+(const Matrix<T>& W) const;
+		Matrix<T> operator+(const Matrix<T>& W) const throw(std::invalid_argument);
 
 		//subtraction of matrices
-		Matrix<T> operator-(const Matrix<T>& W) const;
+		Matrix<T> operator-(const Matrix<T>& W) const throw(std::invalid_argument);
 
 		//scalar multiplication
-		Matrix<T> operator*(const T& C) const;
+		Matrix<T> operator*(const T& C) const noexcept;
 
 		//scalar multiplication (by the inverse of arg)
-		Matrix<T> operator/(const T& C) const;
+		Matrix<T> operator/(const T& C) const throw(std::invalid_argument);
 
 		//Matrix<T> multiplication
-		Matrix<T> operator*(const Matrix<T>& B) const;
+		Matrix<T> operator*(const Matrix<T>& B) const throw(std::invalid_argument);
 
 		//matrix addition
-		Matrix<T> operator+=(const Matrix<T>& W);
+		Matrix<T> operator+=(const Matrix<T>& W) throw(std::invalid_argument);
 
 		//matrix subtraction
-		Matrix<T> operator-=(const Matrix<T>& W);
-
-		//subtract constant C from each record
-		Matrix<T> operator-=(const T& C);
+		Matrix<T> operator-=(const Matrix<T>& W) throw(std::invalid_argument);
 
 		//scalar multiplication
-		Matrix<T> operator*=(const T& C);
+		Matrix<T> operator*=(const T& C) noexcept;
 
 		//matrix multiplication
-		Matrix<T> operator*=(const Matrix<T>& W);
+		Matrix<T> operator*=(const Matrix<T>& W) throw(std::invalid_argument);
 
 		//scalar multiplication
-		Matrix<T> operator/=(const T& C);		
+		Matrix<T> operator/=(const T& C) throw(std::invalid_argument);
 
 		//return Matrix<T>'s transposition
-		Matrix<T> transposed() const;
+		Matrix<T> transposed() const noexcept;
 
 		//return the dot product of two matrices
-		const T dot(const Matrix<T>& B) const;
+		const T dot(const Matrix<T>& B) const throw(std::invalid_argument);
 
 		//print to std IO-stream
-		void print(std::ostream&out=std::cout) const;
+		void print(std::ostream&out=std::cout) const noexcept;
 
 		//add another column to matrix
 		void expandColumn(const std::vector<T>& newCol);
@@ -188,7 +184,7 @@ namespace LinearAlgebra
 	}
 
 	template<typename T>
-	Matrix<T> Matrix<T>::operator=(const Matrix<T>& index)
+	Matrix<T> Matrix<T>::operator=(const Matrix<T>& index) noexcept
 	{
 		if (this == &index)
 		{
@@ -202,9 +198,13 @@ namespace LinearAlgebra
 	}
 
 	template<typename T>
-	Matrix<T> Matrix<T>::operator+(const Matrix<T>& W) const
+	Matrix<T> Matrix<T>::operator+(const Matrix<T>& W) const throw(std::invalid_argument)
 	{
-
+		//if dimensions don't match addition is not defined
+		if (rows != W.rows || columns != W.columns)
+		{
+			throw std::invalid_argument("Addition of matrices is undefined!");
+		}
 		Matrix<T> A(rows, columns);
 		for (size_t i = 0; i < rows; i++)
 		{
@@ -217,9 +217,13 @@ namespace LinearAlgebra
 	}
 
 	template<typename T>
-	Matrix<T> Matrix<T>::operator-(const Matrix<T>& W) const
+	Matrix<T> Matrix<T>::operator-(const Matrix<T>& W) const throw(std::invalid_argument)
 	{
-
+		//if dimensions don't match subtraction is not defined
+		if (rows != W.rows || columns != W.columns)
+		{
+			throw std::invalid_argument("Subtraction of matrices is undefined!");
+		}
 		Matrix<T> A(rows, columns);
 		for (size_t i = 0; i < rows; i++)
 		{
@@ -232,9 +236,8 @@ namespace LinearAlgebra
 	}
 
 	template<typename T>
-	Matrix<T> Matrix<T>::operator*(const T& C) const
+	Matrix<T> Matrix<T>::operator*(const T& C) const noexcept
 	{
-
 		Matrix<T> A(rows, columns);
 		for (size_t i = 0; i < rows; i++)
 		{
@@ -247,9 +250,12 @@ namespace LinearAlgebra
 	}
 
 	template<typename T>
-	Matrix<T> Matrix<T>::operator/(const T& C) const
+	Matrix<T> Matrix<T>::operator/(const T& C) const throw(std::invalid_argument)
 	{
-
+		if (!C)
+		{
+			throw std::invalid_argument("Division by zero is undefined!");
+		}
 		Matrix<T> A(rows, columns);
 		for (size_t i = 0; i < rows; i++)
 		{
@@ -262,9 +268,13 @@ namespace LinearAlgebra
 	}
 
 	template<typename T>
-	Matrix<T> Matrix<T>::operator+=(const Matrix<T>& W)
+	Matrix<T> Matrix<T>::operator+=(const Matrix<T>& W) throw(std::invalid_argument)
 	{
-
+		//if dimensions don't match addition is not defined
+		if (rows != W.rows || columns != W.columns)
+		{
+			throw std::invalid_argument("Addition of matrices is undefined!");
+		}
 		for (size_t i = 0; i < rows; i++)
 		{
 			for (size_t j = 0; j < columns; j++)
@@ -274,10 +284,15 @@ namespace LinearAlgebra
 		}
 		return *this;
 	}
-	template<typename T>
-	Matrix<T> Matrix<T>::operator-=(const Matrix<T>& W)
-	{
 
+	template<typename T>
+	Matrix<T> Matrix<T>::operator-=(const Matrix<T>& W) throw(std::invalid_argument)
+	{
+		//if dimensions don't match subtraction is not defined
+		if (rows != W.rows || columns != W.columns)
+		{
+			throw std::invalid_argument("Subtraction of matrices is undefined!");
+		}
 		for (size_t i = 0; i < rows; i++)
 		{
 			for (size_t j = 0; j < columns; j++)
@@ -289,21 +304,8 @@ namespace LinearAlgebra
 	}
 
 	template<typename T>
-	Matrix<T> Matrix<T>::operator-=(const T& C)
+	Matrix<T> Matrix<T>::operator*=(const T& C) noexcept
 	{
-		for (std::vector<T>& row : context)
-		{
-			for (T& value : row)
-			{
-				value -= C;
-			}
-		}
-		return *this;
-	}
-	template<typename T>
-	Matrix<T> Matrix<T>::operator*=(const T& C)
-	{
-
 		for (size_t i = 0; i < rows; i++)
 		{
 			for (size_t j = 0; j < columns; j++)
@@ -315,17 +317,19 @@ namespace LinearAlgebra
 	}
 
 	template<typename T>
-	inline Matrix<T> Matrix<T>::operator*=(const Matrix<T>& W)
+	Matrix<T> Matrix<T>::operator*=(const Matrix<T>& W) throw(std::invalid_argument)
 	{
-
-		Matrix<T> E((*this) * W);
-		*this = E;
+		*this = (*this) * W;
 		return *this;
 	}
 
 	template<typename T>
-	Matrix<T> Matrix<T>::operator/=(const T& C)
+	Matrix<T> Matrix<T>::operator/=(const T& C) throw(std::invalid_argument)
 	{
+		if (!C)
+		{
+			throw std::invalid_argument("Division by zero is undefined!");
+		}
 		for (size_t i = 0; i < rows; i++)
 		{
 			for (size_t j = 0; j < columns; j++)
@@ -337,11 +341,11 @@ namespace LinearAlgebra
 	}
 
 	template<typename T>
-	Matrix<T> Matrix<T>::operator*(const Matrix<T>& B) const//prduct of two matrices (remember - not commutative)
+	Matrix<T> Matrix<T>::operator*(const Matrix<T>& B) const throw(std::invalid_argument)
 	{
 		if (this->columns != B.rows)
 		{
-			throw __ExceptionMatrixMultiplicationUndefined;
+			throw std::invalid_argument("Matrix multiplication undefined!");
 		}
 		Matrix<T> A(this->rows, B.columns);
 		for (size_t i = 0; i < this->rows; i++)
@@ -361,9 +365,8 @@ namespace LinearAlgebra
 	}
 
 	template<typename T>
-	Matrix<T> Matrix<T>::transposed() const
+	Matrix<T> Matrix<T>::transposed() const noexcept
 	{
-
 		Matrix<T> A(columns, rows);
 		for (size_t i = 0; i < rows; i++)
 		{
@@ -376,9 +379,12 @@ namespace LinearAlgebra
 	}
 
 	template<typename T>
-	const T Matrix<T>::dot(const Matrix<T>& B) const
+	const T Matrix<T>::dot(const Matrix<T>& B) const throw(std::invalid_argument)
 	{
-
+		if (B.rows != rows || B.columns != columns)
+		{
+			throw std::invalid_argument("Dot product is undefined for matrices of different dimensions!");
+		}
 		T s(0);
 		for (size_t i = 0; i < rows; i++)
 		{
@@ -391,7 +397,7 @@ namespace LinearAlgebra
 	}
 
 	template<typename T>
-	void Matrix<T>::print(std::ostream& out) const
+	void Matrix<T>::print(std::ostream& out) const noexcept
 	{
 		for (const std::vector<T>& Q : context)
 		{
@@ -408,7 +414,6 @@ namespace LinearAlgebra
 	template<typename T>
 	void Matrix<T>::expandColumn(const std::vector<T>& newCol)
 	{
-
 		for (size_t i = 0; i < rows; i++)
 		{
 			context[i].push_back(newCol[i]);
@@ -417,7 +422,7 @@ namespace LinearAlgebra
 	}
 
 	template<typename T>
-	inline void Matrix<T>::expandRow(const std::vector<T>& newRow)
+	void Matrix<T>::expandRow(const std::vector<T>& newRow)
 	{
 		context.push_back(newRow);
 		rows++;
@@ -425,16 +430,14 @@ namespace LinearAlgebra
 	}
 
 	template<typename T>
-	inline std::vector<T> Matrix<T>::extractRow(size_t index) const
+	std::vector<T> Matrix<T>::extractRow(size_t index) const
 	{
-
 		return context[index];
 	}
 
 	template<typename T>
-	inline std::vector<T> Matrix<T>::extractColumn(size_t index) const
+	std::vector<T> Matrix<T>::extractColumn(size_t index) const
 	{
-
 		std::vector<T> A;
 		for (size_t i = 0; i < rows; i++)
 		{
@@ -570,7 +573,7 @@ namespace LinearAlgebra
 		}
 		else
 		{
-			throw __ExceptionMatrixDeterminantUndefined;
+			throw std::exception("Determinant is undefined for non square matrix!");
 		}
 	}
 
@@ -609,8 +612,6 @@ namespace LinearAlgebra
 		}
 		return ad;
 	}
-
-
 
 	template<typename T>
 	void modify(Matrix<T>& M,std::function<void(T&)> f)
