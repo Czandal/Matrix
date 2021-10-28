@@ -39,9 +39,9 @@ namespace LinearAlgebra
 		constexpr const T& operator()(const size_t& Row, const size_t& Col) const {return context[Row][Col]; }
 
 		//accesses field of context wit boundary checks
-		constexpr T& at (const size_t& Row, const size_t& Col) {return (Row<rows&&Col<columns)?context[Row][Col]:(throw std::out_of_range("Field of given row and col doesn't exist"));}
+		constexpr T& at (const size_t& Row, const size_t& Col) noexcept(false) {return (Row<rows&&Col<columns)?context[Row][Col]:(throw std::out_of_range("Field of given row and col doesn't exist"));}
 
-		constexpr const T& at(const size_t& Row, const size_t& Col) const { return ((Row<rows&&Col<columns)?context[Row][Col]:throw std::out_of_range("Field of given row and col doesn't exist")); }
+		constexpr const T& at(const size_t& Row, const size_t& Col) const noexcept(false) { return ((Row<rows&&Col<columns)?context[Row][Col]:throw std::out_of_range("Field of given row and col doesn't exist")); }
 
 		//returns true iff two objects have are equal
 		constexpr bool operator==(const Matrix<T>& other)const { return (context == other.context&&rows==other.rows&&other.columns); }
@@ -50,40 +50,40 @@ namespace LinearAlgebra
 		Matrix<T> operator=(const Matrix<T>& index) noexcept;
 
 		//addition of matrices
-		Matrix<T> operator+(const Matrix<T>& W) const throw(std::invalid_argument);
+		Matrix<T> operator+(const Matrix<T>& W) const noexcept(false);
 
 		//subtraction of matrices
-		Matrix<T> operator-(const Matrix<T>& W) const throw(std::invalid_argument);
+		Matrix<T> operator-(const Matrix<T>& W) const noexcept(false);
 
 		//scalar multiplication
 		Matrix<T> operator*(const T& C) const noexcept;
 
 		//scalar multiplication (by the inverse of arg)
-		Matrix<T> operator/(const T& C) const throw(std::invalid_argument);
+		Matrix<T> operator/(const T& C) const noexcept(false);
 
 		//Matrix<T> multiplication
-		Matrix<T> operator*(const Matrix<T>& B) const throw(std::invalid_argument);
+		Matrix<T> operator*(const Matrix<T>& B) const noexcept(false);
 
 		//matrix addition
-		Matrix<T> operator+=(const Matrix<T>& W) throw(std::invalid_argument);
+		Matrix<T> operator+=(const Matrix<T>& W) noexcept(false);
 
 		//matrix subtraction
-		Matrix<T> operator-=(const Matrix<T>& W) throw(std::invalid_argument);
+		Matrix<T> operator-=(const Matrix<T>& W) noexcept(false);
 
 		//scalar multiplication
 		Matrix<T> operator*=(const T& C) noexcept;
 
 		//matrix multiplication
-		Matrix<T> operator*=(const Matrix<T>& W) throw(std::invalid_argument);
+		Matrix<T> operator*=(const Matrix<T>& W) noexcept(false);
 
 		//scalar multiplication
-		Matrix<T> operator/=(const T& C) throw(std::invalid_argument);
+		Matrix<T> operator/=(const T& C) noexcept(false);
 
 		//return Matrix<T>'s transposition
 		Matrix<T> transposed() const noexcept;
 
 		//return the dot product of two matrices
-		const T dot(const Matrix<T>& B) const throw(std::invalid_argument);
+		const T dot(const Matrix<T>& B) const noexcept(false);
 
 		//print to std IO-stream
 		void print(std::ostream&out=std::cout) const noexcept;
@@ -198,7 +198,7 @@ namespace LinearAlgebra
 	}
 
 	template<typename T>
-	Matrix<T> Matrix<T>::operator+(const Matrix<T>& W) const throw(std::invalid_argument)
+	Matrix<T> Matrix<T>::operator+(const Matrix<T>& W) const noexcept(false)
 	{
 		//if dimensions don't match addition is not defined
 		if (rows != W.rows || columns != W.columns)
@@ -217,7 +217,7 @@ namespace LinearAlgebra
 	}
 
 	template<typename T>
-	Matrix<T> Matrix<T>::operator-(const Matrix<T>& W) const throw(std::invalid_argument)
+	Matrix<T> Matrix<T>::operator-(const Matrix<T>& W) const noexcept(false)
 	{
 		//if dimensions don't match subtraction is not defined
 		if (rows != W.rows || columns != W.columns)
@@ -250,7 +250,7 @@ namespace LinearAlgebra
 	}
 
 	template<typename T>
-	Matrix<T> Matrix<T>::operator/(const T& C) const throw(std::invalid_argument)
+	Matrix<T> Matrix<T>::operator/(const T& C) const noexcept(false)
 	{
 		if (!C)
 		{
@@ -268,7 +268,7 @@ namespace LinearAlgebra
 	}
 
 	template<typename T>
-	Matrix<T> Matrix<T>::operator+=(const Matrix<T>& W) throw(std::invalid_argument)
+	Matrix<T> Matrix<T>::operator+=(const Matrix<T>& W) noexcept(false)
 	{
 		//if dimensions don't match addition is not defined
 		if (rows != W.rows || columns != W.columns)
@@ -286,7 +286,7 @@ namespace LinearAlgebra
 	}
 
 	template<typename T>
-	Matrix<T> Matrix<T>::operator-=(const Matrix<T>& W) throw(std::invalid_argument)
+	Matrix<T> Matrix<T>::operator-=(const Matrix<T>& W) noexcept(false)
 	{
 		//if dimensions don't match subtraction is not defined
 		if (rows != W.rows || columns != W.columns)
@@ -317,14 +317,14 @@ namespace LinearAlgebra
 	}
 
 	template<typename T>
-	Matrix<T> Matrix<T>::operator*=(const Matrix<T>& W) throw(std::invalid_argument)
+	Matrix<T> Matrix<T>::operator*=(const Matrix<T>& W) noexcept(false)
 	{
 		*this = (*this) * W;
 		return *this;
 	}
 
 	template<typename T>
-	Matrix<T> Matrix<T>::operator/=(const T& C) throw(std::invalid_argument)
+	Matrix<T> Matrix<T>::operator/=(const T& C) noexcept(false)
 	{
 		if (!C)
 		{
@@ -341,7 +341,7 @@ namespace LinearAlgebra
 	}
 
 	template<typename T>
-	Matrix<T> Matrix<T>::operator*(const Matrix<T>& B) const throw(std::invalid_argument)
+	Matrix<T> Matrix<T>::operator*(const Matrix<T>& B) const noexcept(false)
 	{
 		if (this->columns != B.rows)
 		{
@@ -379,7 +379,7 @@ namespace LinearAlgebra
 	}
 
 	template<typename T>
-	const T Matrix<T>::dot(const Matrix<T>& B) const throw(std::invalid_argument)
+	const T Matrix<T>::dot(const Matrix<T>& B) const noexcept(false)
 	{
 		if (B.rows != rows || B.columns != columns)
 		{
