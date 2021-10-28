@@ -3,7 +3,7 @@ on:
   pull_request:
   push:
   schedule:
-    - cron: '*/720 * * * *'
+    - cron: '*/17280 * * * *'
 jobs:
   Explore-GitHub-Actions:
     runs-on: self-hosted
