@@ -89,57 +89,62 @@ namespace LinearAlgebra
 		void print(std::ostream&out=std::cout) const noexcept;
 
 		//add another column to matrix
-		void expandColumn(const std::vector<T>& newCol);
+		void expandColumn(const std::vector<T>& newCol) noexcept(false);
 
 		//add another row to matrix
-		void expandRow(const std::vector<T>& newRow);
+		void expandRow(const std::vector<T>& newRow) noexcept(false);
 
 		//returns row of given index (from 0 to N-1)
-		std::vector<T> extractRow(size_t index) const;
+		std::vector<T> extractRow(size_t index) const noexcept;
 
 		// returns row of given index (from 0 to N-1)
-		std::vector<T> extractColumn(size_t index) const;
+		std::vector<T> extractColumn(size_t index) const noexcept;
 
 		//change values in a given row
-		void changeRow(const std::vector<T>& row, const size_t& index);
+		void changeRow(const std::vector<T>& row, const size_t& index) noexcept(false);
 
 		//change values in a given column
-		void changeColumn(const std::vector<T>& column, const size_t& index);
+		void changeColumn(const std::vector<T>& column, const size_t& index) noexcept(false);
 
-		void copyFrom(const Matrix<T>& D);
+		void copyFrom(const Matrix<T>& D) noexcept;
 
-		void free();
+		void free() noexcept;
 
 		//returns the sum of all the elements of the matrix
-		const T sum() const;
+		const T sum() const noexcept;
 
 		//return the supremum of set consisting of all the fields in matrix
-		const T max() const;
+		const T max() const noexcept;
 
 		//element wise multiplication of two matrices
-		Matrix<T> hadamardProduct(const Matrix<T>& B) const;
+		Matrix<T> hadamardProduct(const Matrix<T>& B) const noexcept(false);
 		
-		Matrix<T> applyOperation(const Matrix<T>& other, std::function<T(const T&, const T&)>f) const;
+		Matrix<T> applyOperation(const Matrix<T>& other, std::function<T(const T&, const T&)>f) const noexcept(false);
+
+		Matrix<T> applyOperation(const Matrix<T>& other, std::function<T(const T&)>f) const noexcept;
+
+		Matrix<T> modify(std::function<void(T&)>f) noexcept;
+
+		Matrix<T> modify(std::function<T(const T&)>f) noexcept;
 		
-		size_t getCountRows() const { return rows; }
-		size_t getCountColumns() const { return columns; }
+		size_t getCountRows() const noexcept { return rows; }
+		size_t getCountColumns() const noexcept { return columns; }
 
-		constexpr bool empty() const;
+		constexpr bool empty() const noexcept;
 
-		constexpr T det() const;
+		constexpr T det() const noexcept(false);
 
-		constexpr T cofactor(const size_t& i, const size_t& j) const;
+		constexpr T cofactor(const size_t& i, const size_t& j) const noexcept(false);
 
-		Matrix<T> adjoint() const;
+		Matrix<T> adjoint() const noexcept(false);
 	};
-
-	
 
 	template<typename T>
 	Matrix<T>::Matrix() :context(), rows(0), columns(0)
 	{
 
 	}
+
 	template<typename T>
 	Matrix<T>::~Matrix()
 	{
@@ -150,6 +155,7 @@ namespace LinearAlgebra
 		rows = 0;
 		columns = 0;
 	}
+
 	template<typename T>
 	Matrix<T>::Matrix(const size_t& M, const size_t& N) :context(), rows(M), columns(N)
 	{
@@ -412,31 +418,51 @@ namespace LinearAlgebra
 	}
 
 	template<typename T>
-	void Matrix<T>::expandColumn(const std::vector<T>& newCol)
+	void Matrix<T>::expandColumn(const std::vector<T>& newCol) noexcept(false)
 	{
-		for (size_t i = 0; i < rows; i++)
+		if (rows == 0)
 		{
-			context[i].push_back(newCol[i]);
+			for (size_t i = 0; i < newCol.size(); i++)
+			{
+				std::vector<T> newRow;
+				row.push_back(newCol[i]);
+				context.push_back(newRow)
+			}
+		}
+		else
+		{
+			if (newCol.size() != rows)
+			{
+				throw std::invalid_argument("New column has to have as many records as there are rows!");
+			}
+			for (size_t i = 0; i < rows; i++)
+			{
+				context[i].push_back(newCol[i]);
+			}
 		}
 		columns++;
 	}
 
 	template<typename T>
-	void Matrix<T>::expandRow(const std::vector<T>& newRow)
+	void Matrix<T>::expandRow(const std::vector<T>& newRow) noexcept(false)
 	{
+		if (newRow.size() != columns && columns != 0)
+		{
+			throw std::invalid_argument("New row has to have as many records as there are columns!");
+		}
 		context.push_back(newRow);
 		rows++;
 		if (columns == 0) columns = newRow.size();
 	}
 
 	template<typename T>
-	std::vector<T> Matrix<T>::extractRow(size_t index) const
+	std::vector<T> Matrix<T>::extractRow(size_t index) const noexcept
 	{
 		return context[index];
 	}
 
 	template<typename T>
-	std::vector<T> Matrix<T>::extractColumn(size_t index) const
+	std::vector<T> Matrix<T>::extractColumn(size_t index) const noexcept
 	{
 		std::vector<T> A;
 		for (size_t i = 0; i < rows; i++)
@@ -447,9 +473,12 @@ namespace LinearAlgebra
 	}
 
 	template<typename T>
-	inline void Matrix<T>::changeRow(const std::vector<T>& row, const size_t& index)
+	void Matrix<T>::changeRow(const std::vector<T>& row, const size_t& index) noexcept(false)
 	{
-
+		if (row.size() != columns)
+		{
+			throw std::invalid_argument("Dimension of vector provided doesn't match dimensions of the matrix!");
+		}
 		for (size_t i = 0; i < columns; i++)
 		{
 			context[index][i]=row[i];
@@ -457,9 +486,12 @@ namespace LinearAlgebra
 	}
 
 	template<typename T>
-	inline void Matrix<T>::changeColumn(const std::vector<T>& column, const size_t& index)
+	void Matrix<T>::changeColumn(const std::vector<T>& column, const size_t& index)
 	{
-
+		if (column.size() != rows)
+		{
+			throw std::invalid_argument("Dimension of vector provided doesn't match dimensions of the matrix!");
+		}
 		for (size_t i = 0; i < rows; i++)
 		{
 			context[i][index] = column[i];
@@ -467,14 +499,15 @@ namespace LinearAlgebra
 	}
 
 	template<typename T>
-	inline void Matrix<T>::copyFrom(const Matrix<T>& D)
+	void Matrix<T>::copyFrom(const Matrix<T>& D) noexcept
 	{
-		//assume this->rows=D.rows and this->columns=D.columns and *this!=D
 		this->context = D.context;
+		rows = D.rows;
+		columns = D.columns;
 	}
 
 	template<typename T>
-	inline void Matrix<T>::free()
+	void Matrix<T>::free() noexcept
 	{
 		context.erase(context.begin(), context.end());
 		columns = 0;
@@ -482,7 +515,7 @@ namespace LinearAlgebra
 	}
 
 	template<typename T>
-	inline const T Matrix<T>::sum() const
+	const T Matrix<T>::sum() const noexcept
 	{
 		T S=0.0;
 		for (const std::vector<T>& W : context)
@@ -496,7 +529,7 @@ namespace LinearAlgebra
 	}
 
 	template<typename T>
-	inline const T Matrix<T>::max() const
+	const T Matrix<T>::max() const noexcept
 	{
 		T supremum=0.0;
 		for (const std::vector<T>&row : context)
@@ -513,9 +546,12 @@ namespace LinearAlgebra
 	}
 
 	template<typename T>
-	Matrix<T> Matrix<T>::hadamardProduct(const Matrix<T>& B) const
+	Matrix<T> Matrix<T>::hadamardProduct(const Matrix<T>& B) const noexcept(false)
 	{
-
+		if (B.rows != rows || B.columns != columns)
+		{
+			throw std::invalid_argument("Hadamard product is undefined for matrices of different dimensions!");
+		}
 		Matrix<T> returned(rows,columns);
 		for (size_t i = 0; i < rows; i++)
 		{
@@ -528,9 +564,12 @@ namespace LinearAlgebra
 	}
 
 	template<typename T>
-	Matrix<T> Matrix<T>::applyOperation(const Matrix<T>& other, std::function < T(const T&, const T&)>f) const
+	Matrix<T> Matrix<T>::applyOperation(const Matrix<T>& other, std::function < T(const T&, const T&)>f) const noexcept(false)
 	{
-
+		if (other.rows != rows || other.columns != columns)
+		{
+			throw std::invalid_argument("Function applyOperation is undefined for matrices of different dimensions!");
+		}
 		Matrix<T> result(this->rows, this->columns);
 		for (size_t i = 0; i < this->rows; i++)
 		{
@@ -543,7 +582,47 @@ namespace LinearAlgebra
 	}
 
 	template<typename T>
-	inline constexpr bool Matrix<T>::empty() const
+	Matrix<T> Matrix<T>::applyOperation(const Matrix<T>& other, std::function < T(const T&)>f) const noexcept
+	{
+		Matrix<T> result(this->rows, this->columns);
+		for (size_t i = 0; i < this->rows; i++)
+		{
+			for (size_t j = 0; j < this->columns; j++)
+			{
+				result.at(i, j) = f(this->context[i][j]);
+			}
+		}
+		return result;
+	}
+
+	template<typename T>
+	Matrix<T> Matrix<T>::modify(std::function<void(T&)> f) noexcept
+	{
+		for (std::vector<T>& row : context)
+		{
+			for (T& field : row)
+			{
+				f(field);
+			}
+		}
+		return *this;
+	}
+
+	template<typename T>
+	Matrix<T> Matrix<T>::modify(std::function<T(const T&)> f) noexcept
+	{
+		for (std::vector<T>& row : context)
+		{
+			for (T& field : row)
+			{
+				field=f(field);
+			}
+		}
+		return *this;
+	}
+
+	template<typename T>
+	constexpr bool Matrix<T>::empty() const noexcept
 	{
 		for (const std::vector<T>& row : context)
 		{
@@ -553,13 +632,15 @@ namespace LinearAlgebra
 	}
 
 	template<typename T>
-	constexpr T Matrix<T>::det() const
+	constexpr T Matrix<T>::det() const noexcept(false)
 	{
-		if (rows == columns && rows != 0)
+		if (rows == columns)
 		{
 			T det = 0;
 			switch (rows)
 			{
+			case 0:
+				return 1;
 			case 1:
 				return context[0][0];
 			case 2:
@@ -578,7 +659,7 @@ namespace LinearAlgebra
 	}
 
 	template<typename T>
-	constexpr T Matrix<T>::cofactor(const size_t& i, const size_t& j) const
+	constexpr T Matrix<T>::cofactor(const size_t& i, const size_t& j) const noexcept(false)
 	{
 		Matrix<T> sub(rows - 1, columns - 1);
 		size_t it = 0;
@@ -600,7 +681,7 @@ namespace LinearAlgebra
 	}
 
 	template<typename T>
-	Matrix<T> Matrix<T>::adjoint() const
+	Matrix<T> Matrix<T>::adjoint() const noexcept(false)
 	{
 		Matrix ad(rows, columns);
 		for (size_t i = 0; i < rows; i++)
@@ -611,51 +692,10 @@ namespace LinearAlgebra
 			}
 		}
 		return ad;
-	}
+	}	
 
 	template<typename T>
-	void modify(Matrix<T>& M,std::function<void(T&)> f)
-	{
-		for (size_t i = 0; i < M.getCountRows(); i++)
-		{
-			for (size_t j = 0; j < M.getCountColumns(); j++)
-			{
-				f(M[i][j]);
-			}
-		}
-	}
-
-	template<typename T>
-	void modify(Matrix<T>& M, void(*f)(T&))
-	{
-
-		for (size_t i = 0; i < M.getCountRows(); i++)
-		{
-			for (size_t j = 0; j < M.getCountColumns(); j++)
-			{
-				f(M[i][j]);
-			}
-		}
-	}
-
-	template<typename T>
-	Matrix<T> applyFunction(Matrix<T> M, std::function<T(T)> f)
-	{
-
-		for (size_t i = 0; i < M.getCountRows(); i++)
-		{
-			for (size_t j = 0; j < M.getCountColumns(); j++)
-			{
-				M(i, j) = f(M(i, j));
-			}
-		}
-		return M;
-	}
-
-	
-
-	template<typename T>
-	bool isnan(LinearAlgebra::Matrix<T> Mat)
+	bool isnan(const LinearAlgebra::Matrix<T>& Mat) noexcept
 	{
 		for (size_t i = 0; i < Mat.getCountRows(); i++)
 		{
