@@ -573,7 +573,7 @@ namespace LinearAlgebra
 		}
 		else
 		{
-			throw std::exception("Determinant is undefined for non square matrix!");
+			throw std::domain_error("Determinant is undefined for non square matrix!");
 		}
 	}
 
