@@ -425,8 +425,8 @@ namespace LinearAlgebra
 			for (size_t i = 0; i < newCol.size(); i++)
 			{
 				std::vector<T> newRow;
-				row.push_back(newCol[i]);
-				context.push_back(newRow)
+				newRow.push_back(newCol[i]);
+				context.push_back(newRow);
 			}
 		}
 		else
