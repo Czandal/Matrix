@@ -137,6 +137,8 @@ namespace LinearAlgebra
 		constexpr T cofactor(const size_t& i, const size_t& j) const noexcept(false);
 
 		Matrix<T> adjoint() const noexcept(false);
+
+		Matrix<T> inverse() const noexcept(false);
 	};
 
 	template<typename T>
@@ -691,8 +693,18 @@ namespace LinearAlgebra
 				ad(i, j) = cofactor(i, j);
 			}
 		}
-		return ad;
-	}	
+		return ad.transposed();
+	}
+	template<typename T>
+	Matrix<T> Matrix<T>::inverse() const noexcept(false)
+	{
+		if (rows != columns)
+		{
+			throw std::domain_error("Inverse of matrix is undefined for non-square matrices!");
+		}
+		return adjoint()/det();
+	}
+
 
 	template<typename T>
 	bool isnan(const LinearAlgebra::Matrix<T>& Mat) noexcept

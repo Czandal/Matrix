@@ -88,19 +88,7 @@ TEST_F(MatrixTest, MatrixMultiplicationTest)
 
 	long double determinantC;
 	ASSERT_NO_THROW(determinantC = C.det()) << "Error: Determinant is not defined\n";
-	determinantC = C.det();
 	std::cout << determinantC<<"\n";
-
-	if (std::abs(determinantC) >= 0.0000001l)
-	{
-		when("Determinant of C is not equal to 0");
-
-		then("There exists multiplicative inverse D such that C*D=identity:");
-		Mat D;
-		ASSERT_NO_THROW(D=C.adjoint().transposed()/determinantC)<<"Error: C is not invertible!\n";
-		EXPECT_TRUE(C*D == id)<<"Error: C*D is not equal to identity matrix!\n";
-		D.print();
-	}
 }
 TEST_F(MatrixTest, MatrixAdditionTest)
 {
@@ -132,4 +120,60 @@ TEST_F(MatrixTest, MatrixAdditionTest)
 	Mat id(2, 3);
 	EXPECT_TRUE(C + id==C&&id+C==C)<<"Error: C plus identity is not equal to C!\n";
 	id.print();
+}
+
+TEST_F(MatrixTest, MatrixSpecificOperationsTest)
+{
+	
+	given("3x3 matrix A:");
+	Mat A(3, 3);
+	A(0, 0) = 5.l;
+	A(0, 1) = 1.l;
+	A(0, 2) = 3.l;
+	A(1, 0) = -4.l;
+	A(1, 1) = 1.l;
+	A(1, 2) = -2.l;
+	A(2, 0) = 0.l;
+	A(2, 1) = 7.l;
+	A(2, 2) = 0.l;
+	A.print();
+
+	then("Determinant is defined and is equal "+ std::to_string(-14.l));
+	ASSERT_EQ(A.det(), -14.l);
+
+	then("By transposing matrix A we receive a new matrix equal to:");
+	Mat traA(3, 3);
+	traA(0, 0) = 5.l;
+	traA(0, 1) = -4.l;
+	traA(0, 2) = 0.l;
+	traA(1, 0) = 1.l;
+	traA(1, 1) = 1.l;
+	traA(1, 2) = 7.l;
+	traA(2, 0) = 3.l;
+	traA(2, 1) = -2.l;
+	traA(2, 2) = 0.l;
+	traA.print();
+	ASSERT_TRUE(A.transposed()==traA)<<"Transposition of Matrix A is not equal to A.transposed()!\n";
+
+	then("There exists adjugate of A equal to: ");
+	Mat adjA(3, 3);
+	adjA(0, 0) = 14.l;
+	adjA(0, 1) = 21.l;
+	adjA(0, 2) = -5.l;
+	adjA(1, 0) = 0.l;
+	adjA(1, 1) = 0.l;
+	adjA(1, 2) = -2.l;
+	adjA(2, 0) = -28.l;
+	adjA(2, 1) = -35.l;
+	adjA(2, 2) = 9.l;
+	adjA.print();
+	EXPECT_TRUE(A.adjoint()==adjA) << "Adjoint of Matrix A is not equal to A.adjoint()!\n";
+
+	then("There exists an inverse of A equal to which multiplied by A yields identity matrix: ");
+	Mat inv(3,3);
+	ASSERT_NO_THROW(inv = A.inverse())<<"Inverse of A is undefined!\n";
+	inv.print();
+	EXPECT_EQ(identityMultiplicativeSquare(3), inv * A)<<"A.inv()*A doesn't yield multiplicative identity!\n";
+	(inv * A).print();
+
 }
