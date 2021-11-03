@@ -124,7 +124,6 @@ TEST_F(MatrixTest, MatrixAdditionTest)
 
 TEST_F(MatrixTest, MatrixSpecificOperationsTest)
 {
-	
 	given("3x3 matrix A:");
 	Mat A(3, 3);
 	A(0, 0) = 5.l;
@@ -175,5 +174,4 @@ TEST_F(MatrixTest, MatrixSpecificOperationsTest)
 	inv.print();
 	EXPECT_EQ(identityMultiplicativeSquare(3), inv * A)<<"A.inv()*A doesn't yield multiplicative identity!\n";
 	(inv * A).print();
-
 }
