@@ -16,6 +16,6 @@ set(Sources
     Matrix.cpp
 )
 
-add_library(${PROJECT_NAME} STATIC ${Sources} ${Headers})
+add_library(${PROJECT_NAME} SHARED ${Sources} ${Headers})
 
 add_subdirectory(Test)
