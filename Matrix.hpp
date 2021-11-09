@@ -39,9 +39,9 @@ namespace LinearAlgebra
 		constexpr const T& operator()(const size_t& Row, const size_t& Col) const {return context[Row][Col]; }
 
 		//accesses field of context with boundary checks
-		constexpr T& at (const size_t& Row, const size_t& Col) noexcept(false) {return (Row<rows&&Col<columns)?context[Row][Col]:(throw std::out_of_range("Field of given row and col doesn't exist"));}
+		constexpr T& at (const size_t& Row, const size_t& Col) noexcept(false) {return (context.at(Row)).at(Col);}
 
-		constexpr const T& at(const size_t& Row, const size_t& Col) const noexcept(false) { return ((Row<rows&&Col<columns)?context[Row][Col]:throw std::out_of_range("Field of given row and col doesn't exist")); }
+		constexpr const T& at(const size_t& Row, const size_t& Col) const noexcept(false) {return (context.at(Row)).at(Col);}
 
 		//returns true iff two objects have are equal
 		constexpr bool operator==(const Matrix<T>& other)const { return (context == other.context&&rows==other.rows&&other.columns); }
