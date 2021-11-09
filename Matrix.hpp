@@ -38,7 +38,7 @@ namespace LinearAlgebra
 
 		constexpr const T& operator()(const size_t& Row, const size_t& Col) const {return context[Row][Col]; }
 
-		//accesses field of context wit boundary checks
+		//accesses field of context with boundary checks
 		constexpr T& at (const size_t& Row, const size_t& Col) noexcept(false) {return (Row<rows&&Col<columns)?context[Row][Col]:(throw std::out_of_range("Field of given row and col doesn't exist"));}
 
 		constexpr const T& at(const size_t& Row, const size_t& Col) const noexcept(false) { return ((Row<rows&&Col<columns)?context[Row][Col]:throw std::out_of_range("Field of given row and col doesn't exist")); }
@@ -121,7 +121,7 @@ namespace LinearAlgebra
 		
 		Matrix<T> applyOperation(const Matrix<T>& other, std::function<T(const T&, const T&)>f) const noexcept(false);
 
-		Matrix<T> applyOperation(const Matrix<T>& other, std::function<T(const T&)>f) const noexcept;
+		Matrix<T> applyOperation(std::function<T(const T&)>f) const noexcept;
 
 		Matrix<T> modify(std::function<void(T&)>f) noexcept;
 
@@ -584,7 +584,7 @@ namespace LinearAlgebra
 	}
 
 	template<typename T>
-	Matrix<T> Matrix<T>::applyOperation(const Matrix<T>& other, std::function < T(const T&)>f) const noexcept
+	Matrix<T> Matrix<T>::applyOperation(std::function < T(const T&)>f) const noexcept
 	{
 		Matrix<T> result(this->rows, this->columns);
 		for (size_t i = 0; i < this->rows; i++)

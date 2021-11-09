@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include "../Matrix.hpp"
 #include <random>
+#include <functional>
 
 struct MatrixTest : public ::testing::Test
 {
@@ -120,6 +121,11 @@ TEST_F(MatrixTest, MatrixAdditionTest)
 	Mat id(2, 3);
 	EXPECT_TRUE(C + id==C&&id+C==C)<<"Error: C plus identity is not equal to C!\n";
 	id.print();
+
+	then("D-D yields matrix with only 0 as entries:");
+	std::function < long double(const long double&) > setToZero = [](const long double& In) {return 0.l; };
+	ASSERT_TRUE(D-D==D.applyOperation(setToZero))<<"D-D is not equal to matrix with 0 as entries!\n";
+	EXPECT_NO_THROW((D - D).print())<<"Printing effet of subtracting D from D failed!\n";
 }
 
 TEST_F(MatrixTest, MatrixSpecificOperationsTest)
@@ -174,4 +180,32 @@ TEST_F(MatrixTest, MatrixSpecificOperationsTest)
 	inv.print();
 	EXPECT_EQ(identityMultiplicativeSquare(3), inv * A)<<"A.inv()*A doesn't yield multiplicative identity!\n";
 	(inv * A).print();
+
+	given("Matrix of dimensions other than A - B:");
+	Mat B = randomMatrix(4, 3);
+	B.print();
+
+	then("Hadamard product of two matrices is undefined.");
+	EXPECT_THROW(B.hadamardProduct(A),std::invalid_argument) << "Hadamard product hasn't thrown a std::invalid_argument exception!\n";
+
+	then("Dot product of two matrices is undefined.");
+	EXPECT_THROW(B.dot(A), std::invalid_argument) << "Dot product hasn't thrown a std::invalid_argument exception!\n";
+
+	then("Dot product of A with itself is equal to sum of squares of its entries - 105.l");
+	EXPECT_EQ(105.l, A.dot(A))<<"Dot product A with itself was not equal to sum of squares of its entries!\n";
+}
+
+TEST_F(MatrixTest, MatrixClassSpecificFunctions)
+{
+	given("Any valid matrix A:");
+	Mat A = randomMatrix(6, 2);
+	A.print();
+	
+	then("A.free() is empty:");
+	A.free();
+	ASSERT_TRUE(A.empty()) << "A is not empty!\n";
+	A.print();
+
+	then("Sum of elements of A is identically equal to zero.");
+	EXPECT_EQ(A.sum(), 0.l);
 }
