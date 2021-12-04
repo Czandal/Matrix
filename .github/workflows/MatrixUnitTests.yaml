@@ -3,10 +3,10 @@ on:
   pull_request:
   push:
   schedule:
-    - cron: '*/17280 * * * *'
+    - cron: '30 5,17 * * *'
 jobs:
   Explore-GitHub-Actions:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - run: git submodule update --init --recursive
